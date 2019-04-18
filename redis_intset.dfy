@@ -154,3 +154,36 @@ method intsetGet(is: array<int>, pos: nat) returns (value: int, inRange: bool)
 	return;
 }
 
+
+method intsetRemove(is: array<int>, value: nat) returns (success: bool)
+{
+    // Since success is actually a pointer passed by reference, 
+    // just initialize it as a boolean value for purposes of
+    // this method. Initialize as false, which is what the if
+    // statement essentially does.
+    success := false;
+    // Seems 
+
+}
+
+// Return the length of the intset
+method intsetLen(is: array<int>) returns (length: nat)
+// Length should not be negative
+ ensures length >= 0
+ ensures length == is.Length
+{
+    length := is.Length;
+    return;
+}
+
+// Return true if the value is in the intset; false if not.
+method intsetFind(is: array<int>, value: nat) returns (found: bool)
+// If method returns false, value should not be found in the array.
+ensures !found ==> forall k :: 0 <= k < is.Length ==> is[k] != value
+// If the method return, value should be in the array.
+ensures found ==> exists k :: 0 <= k < is.Length && is[k] == value
+{
+    var pos;
+    pos, found := intsetSearch(is, value);
+    return;
+}
