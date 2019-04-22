@@ -204,6 +204,12 @@ method intsetResize(is: array<int>, len: nat) returns (is_ret: array<int>)
 	return;
 }
 
+method intsetNew() returns (is: array<int>)
+{
+	is := new int[0];
+	return;
+}
+
 // Return the length of the intset
 method intsetLen(is: array<int>) returns (length: nat)
 // Length should not be negative
