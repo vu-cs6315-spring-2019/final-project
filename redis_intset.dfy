@@ -77,6 +77,22 @@ static uint8_t intsetSearch(intset *is, int64_t value, uint32_t *pos) {
 
 */
 
+method intsetAdd(is: array<int>, value: int) returns (success: bool, is_ret: array<int>)
+{
+	var pos: nat, found: bool := intsetSearch(is, value);
+	
+	if (found) {
+		success := false;
+		is_ret := is;
+		return;
+	}
+
+	is_ret := intsetResize(is, is.Length+1);
+	intsetSet(is_ret, pos, value);
+	return;
+}
+	
+
 /* Search for the position of "value". Return 1 when the value was found and
  * sets "pos" to the position of the value within the intset. Return 0 when
  * the value is not present in the intset and sets "pos" to the position
@@ -154,6 +170,11 @@ method intsetGet(is: array<int>, pos: nat) returns (value: int, inRange: bool)
 	return;
 }
 
+method intsetSet(is: array<int>, pos: nat, value: int)
+{
+	is[pos] := value;
+	return;
+}
 
 method intsetRemove(is: array<int>, value: nat) returns (success: bool)
 {
@@ -164,6 +185,23 @@ method intsetRemove(is: array<int>, value: nat) returns (success: bool)
     success := false;
     // Seems 
 
+}
+
+method intsetResize(is: array<int>, len: nat) returns (is_ret: array<int>)
+{
+	is_ret := new int[len];
+	var index := 0;
+	while index < len 
+	{
+		if (index >= is.Length)
+		{
+			is_ret[index] := 0;
+		} else {
+			is_ret[index] := is[index];
+		}
+		index := index + 1;
+	}
+	return;
 }
 
 // Return the length of the intset
