@@ -1,4 +1,5 @@
 method intsetMoveTail(is: array<int>, from: nat, to: nat) returns (is_ret: array<int>)
+	modifies is
 {
 	if (from < to) {
 		var index := is.Length-1;
@@ -19,6 +20,7 @@ method intsetMoveTail(is: array<int>, from: nat, to: nat) returns (is_ret: array
 	
 method intsetAdd(is: array<int>, value: int) returns (success: bool, is_ret: array<int>)
 	ensures success <==> is_ret.Length == is.Length + 1
+	modifies is
 {
 	success := true;
 	var pos: nat, found: bool := intsetSearch(is, value);
@@ -46,7 +48,9 @@ method intsetAdd(is: array<int>, value: int) returns (success: bool, is_ret: arr
 method intsetSearch(is: array<int>, value: int) returns (pos: nat, found: bool)
   ensures is.Length > 0 ==> pos <= is.Length
 	ensures !found ==> forall k :: 0 <= k < is.Length ==> is[k] != value
-	ensures is.Length > 0 && value > is[is.Length-1] ==> pos == is.Length 
+	ensures is.Length > 0 && value > is[is.Length-1] ==> pos == is.Length
+	ensures is.Length == 0 ==> !found
+	ensures found ==> is.Length >= 1
 {
 	var min: int, max: int, mid: int := 0, is.Length - 1, -1;
 	var cur: int := -1;
@@ -117,6 +121,7 @@ method intsetGet(is: array<int>, pos: nat) returns (value: int, inRange: bool)
 }
 
 method intsetSet(is: array<int>, pos: nat, value: int) returns (is_ret: array<int>)
+	modifies is
 {
 	is[pos] := value;
 	is_ret := is;
@@ -124,6 +129,8 @@ method intsetSet(is: array<int>, pos: nat, value: int) returns (is_ret: array<in
 }
 
 method intsetRemove(is: array<int>, value: nat) returns (success: bool, is_ret: array<int>)
+	requires is.Length >= 1
+	modifies is
 {
   success := false;
 	var pos: nat, found: bool := intsetSearch(is, value);	
@@ -138,6 +145,9 @@ method intsetRemove(is: array<int>, value: nat) returns (success: bool, is_ret: 
 }
 
 method intsetResize(is: array<int>, len: nat) returns (is_ret: array<int>)
+	ensures is_ret.Length == len
+	ensures len < is.Length ==> forall k :: 0 <= k < is_ret.Length ==> is[k] == is_ret[k]
+	ensures len > is.Length ==> forall k :: 0 <= k < is.Length ==> is[k] == is_ret[k]
 {
 	is_ret := new int[len];
 	var index := 0;
@@ -175,10 +185,10 @@ method intsetLen(is: array<int>) returns (length: nat)
 
 // Return true if the value is in the intset; false if not.
 method intsetFind(is: array<int>, value: nat) returns (found: bool)
-// If method returns false, value should not be found in the array.
-ensures !found ==> forall k :: 0 <= k < is.Length ==> is[k] != value
-// If the method return, value should be in the array.
-ensures found ==> exists k :: 0 <= k < is.Length && is[k] == value
+	// If method returns false, value should not be found in the array.
+	ensures !found ==> forall k :: 0 <= k < is.Length ==> is[k] != value
+	// If the method return, value should be in the array.
+	ensures found ==> exists k :: 0 <= k < is.Length && is[k] == value
 {
     var pos;
     pos, found := intsetSearch(is, value);
