@@ -1,5 +1,26 @@
-method intsetAdd(is: array<int>, value: int) returns (success: bool, is_ret: array<int>)
+method intsetMoveTail(is: array<int>, from: nat, to: nat) returns (is_ret: array<int>)
 {
+	if (from < to) {
+		var index := is.Length-1;
+		while (index >= from) {
+			is[index] := is[index-1];
+			index := index - 1;
+		}
+	} else if (from > to) {
+		var index := to;
+		while (index < is.Length) {
+			is[index] := is[index+1];
+			index := index + 1;
+		}
+	}
+	is_ret := is;
+	return;
+}
+	
+method intsetAdd(is: array<int>, value: int) returns (success: bool, is_ret: array<int>)
+	ensures success <==> is_ret.Length == is.Length + 1
+{
+	success := true;
 	var pos: nat, found: bool := intsetSearch(is, value);
 	
 	if (found) {
@@ -9,7 +30,11 @@ method intsetAdd(is: array<int>, value: int) returns (success: bool, is_ret: arr
 	}
 
 	is_ret := intsetResize(is, is.Length+1);
-	intsetSet(is_ret, pos, value);
+	if (pos < is_ret.Length) {
+		is_ret := intsetMoveTail(is_ret, pos, pos+1);
+	}
+	
+	is_ret := intsetSet(is_ret, pos, value);
 	return;
 }
 	
@@ -91,21 +116,25 @@ method intsetGet(is: array<int>, pos: nat) returns (value: int, inRange: bool)
 	return;
 }
 
-method intsetSet(is: array<int>, pos: nat, value: int)
+method intsetSet(is: array<int>, pos: nat, value: int) returns (is_ret: array<int>)
 {
 	is[pos] := value;
+	is_ret := is;
 	return;
 }
 
-method intsetRemove(is: array<int>, value: nat) returns (success: bool)
+method intsetRemove(is: array<int>, value: nat) returns (success: bool, is_ret: array<int>)
 {
-    // Since success is actually a pointer passed by reference, 
-    // just initialize it as a boolean value for purposes of
-    // this method. Initialize as false, which is what the if
-    // statement essentially does.
-    success := false;
-    // Seems 
-
+  success := false;
+	var pos: nat, found: bool := intsetSearch(is, value);	
+	if (found) {
+		success := true;
+		if (pos < (is.Length - 1)) {
+			is_ret := intsetMoveTail(is, pos+1, pos);
+			is_ret := intsetResize(is_ret, is_ret.Length - 1);
+		}
+	}
+	return;
 }
 
 method intsetResize(is: array<int>, len: nat) returns (is_ret: array<int>)
