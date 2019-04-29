@@ -20,6 +20,16 @@ method intsetMoveTail(is: array<int>, from: nat, to: nat) returns (is_ret: array
 	
 method intsetAdd(is: array<int>, value: int) returns (success: bool, is_ret: array<int>)
 	ensures success <==> is_ret.Length == is.Length + 1
+	// Length of returned set must be greater than or equal to length of original set
+	ensures is_ret.Length >= is.Length
+	// Returned set cannot be more than one element larger than original set
+	ensures is_ret.Length <= is.Length + 1
+	// All elements in original set are in returned set
+	ensures forall k :: 0 <= k < is.Length ==> exists j :: 0 <= j < is_ret.Length && is[k] == is_ret[j] 
+	// No duplicate elements in returned set
+	ensures forall k :: 0 <= k < is_ret.Length ==> forall j :: 0 <= j < is_ret.Length && j != 0 ==> is_ret[k] != is_ret[j]
+	// Value is in returned set
+	ensures exists j :: 0 <= j < is_ret.Length && is_ret[j] == value
 	modifies is
 {
 	success := true;
